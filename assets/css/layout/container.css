@@ -1,0 +1,14 @@
+/* ==========================================================================
+   CONTAINER - wrapper centrado con max-width y padding lateral
+   ========================================================================== */
+
+@layer layout {
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+}

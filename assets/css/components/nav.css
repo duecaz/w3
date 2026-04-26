@@ -1,0 +1,188 @@
+/* ==========================================================================
+   NAV.CSS — barra superior fija (overlay sobre el hero, sólida al scrollear)
+
+   Layout:
+     Mobile  (<960px):  [hamb]  [logo centrado]  [whatsapp]
+     Desktop (>=960px): [logo]  [menu-bar horizontal]  ...  [whatsapp]
+
+   Componentes que viven dentro:
+     .nav-toggle          → hamburguesa (mobile only)
+     .nav-logo            → logo SVG con currentColor
+     .menu-bar            → componente externo (menu-bar.css), desktop only
+     .nav-right           → contenedor de versión-debug + WhatsApp
+
+   Componentes hermanos (NO descendientes):
+     .menu-drawer         → overlay fullscreen mobile (menu-drawer.css)
+                            Es hermano del header a propósito: anidarlo aquí
+                            crearía un containing block que atraparía su
+                            position:fixed y problemas de stacking. Su z-index
+                            (--z-menu = 900) es menor que el del nav (1000)
+                            para que el header pinte encima — ver menu-drawer.css.
+
+   Estados del nav (combinables, manejados por JS):
+     .nav                  → sólido por defecto (páginas sin hero).
+     .nav.nav-over-hero    → transparente, texto blanco (vive sobre el hero).
+     .nav.is-scrolled      → fuerza sólido (scroll pasó el hero) — nav-scroll.js.
+     .nav.is-hidden        → oculta el nav (translateY(-100%)) al scrollear ↓.
+     .nav.is-menu-open     → fuerza sólido + visible (drawer abierto)
+                              — la añade menu-drawer.js cuando el drawer abre.
+     .nav:focus-within     → fuerza visible (algo del nav tiene foco).
+
+   Todos los hijos usan currentColor → un único toggle de color en .nav
+   cambia logo, hamburguesa, menu-bar, whatsapp y badge debug.
+
+   Secciones (Ctrl+F):
+     1) BASE Y MODOS DE COLOR
+     2) AUTO-HIDE
+     3) LAYOUT INTERNO (.nav-inner)
+     4) HAMBURGUESA
+     5) LOGO
+     6) RIGHT (versión + WhatsApp)
+     7) DESKTOP overrides (>= 960px)
+   ========================================================================== */
+
+@layer component {
+
+/* === 1) BASE Y MODOS DE COLOR =============================================== */
+
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: var(--z-header);
+  background: var(--c-bg);
+  color: var(--c-text);
+  box-shadow: var(--shadow-nav);
+  /* Animamos color/bg/shadow Y transform (auto-hide). */
+  transition: background var(--t-base),
+              color      var(--t-base),
+              box-shadow var(--t-base),
+              transform  var(--t-base);
+  will-change: transform;
+}
+
+/* Sobre el hero: transparente + texto claro. */
+.nav-over-hero {
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* Gradient de legibilidad: ayuda al contraste cuando lleguen las fotos
+   reales (algunas serán claras). Solo activo en estado transparente. */
+.nav-over-hero:not(.is-scrolled):not(.is-menu-open)::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: calc(var(--nav-h) + 32px);
+  background: linear-gradient(to bottom, rgba(0,0,0,.32), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Modos sólidos (scroll pasó hero, o drawer abierto). */
+.nav-over-hero.is-scrolled,
+.nav-over-hero.is-menu-open {
+  background: var(--c-bg);
+  color: var(--c-text);
+  box-shadow: var(--shadow-nav);
+}
+
+
+/* === 2) AUTO-HIDE =========================================================== */
+
+/* Scroll ↓ oculta el nav. Estos overrides aseguran que esté visible cuando: */
+.nav.is-hidden { transform: translateY(-100%); }
+
+/* ...el menú está abierto (no podemos perder el contexto). */
+.nav.is-menu-open,
+/* ...o algo dentro del nav tiene foco por teclado (Tab al logo, etc). */
+.nav:focus-within {
+  transform: translateY(0);
+}
+
+
+/* === 3) LAYOUT INTERNO ====================================================== */
+
+.nav-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: var(--nav-h);
+  gap: var(--sp-3);
+}
+
+
+/* === 4) HAMBURGUESA ========================================================= */
+
+.nav-toggle {
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  gap: 5px;
+  width: 40px; height: 40px;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-toggle span {
+  display: block;
+  width: 20px; height: 2px;
+  background: currentColor;
+  transition: transform var(--t-base), opacity var(--t-base), width var(--t-base);
+}
+.nav-toggle span:nth-child(2) { width: 14px; }
+
+/* Estado activo: cruz */
+.nav-toggle.is-active span:nth-child(1) { transform: translateY(7px) rotate(45deg);  width: 20px; }
+.nav-toggle.is-active span:nth-child(2) { opacity: 0; }
+.nav-toggle.is-active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); width: 20px; }
+
+
+/* === 5) LOGO ================================================================ */
+
+.nav-logo {
+  justify-self: center;
+  display: inline-flex; align-items: center;
+  color: inherit;
+}
+.nav-logo svg { height: var(--logo-h); width: auto; }
+
+
+/* === 6) RIGHT (versión debug + WhatsApp) =================================== */
+
+.nav-right {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: inherit;
+}
+
+.nav-whatsapp {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  color: inherit;
+}
+.nav-whatsapp svg { width: 22px; height: 22px; fill: currentColor; }
+
+/* Versión: solo en modo debug (body.debug). Hereda color y se atenúa. */
+.nav-version { display: none; }
+body.debug .nav-version {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  color: currentColor;
+  opacity: .65;
+  white-space: nowrap;
+}
+body.debug .nav-version::before { content: "DEBUG " var(--version, "v?"); }
+
+
+/* === 7) DESKTOP overrides (>= 960px) ======================================= */
+
+@media (min-width: 960px) {
+  .nav-toggle { display: none; }
+  .nav-logo   { justify-self: start; }
+  .nav-inner  { gap: var(--sp-6); }
+}
+
+}

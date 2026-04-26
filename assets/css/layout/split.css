@@ -1,0 +1,34 @@
+/* ==========================================================================
+   SPLIT - layout primitivo de 2 columnas: texto + media.
+   Mobile: stacked (texto arriba, media abajo) — patrón DJI mobile.
+   Desktop ≥768px: 50/50 alineados al centro.
+   .split--media-left invierte el orden en desktop.
+   Reutilizable en hero y feature sections.
+   ========================================================================== */
+
+@layer layout {
+
+.split {
+  display: grid;
+  gap: var(--sp-6);
+  grid-template-areas:
+    "text"
+    "media";
+}
+
+.split__text  { grid-area: text;  min-width: 0; }
+.split__media { grid-area: media; min-width: 0; }
+
+@media (min-width: 768px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "text media";
+    align-items: center;
+    gap: var(--sp-10);
+  }
+  .split--media-left {
+    grid-template-areas: "media text";
+  }
+}
+
+}

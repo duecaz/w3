@@ -1,0 +1,82 @@
+/* ==========================================================================
+   MENU-BAR.CSS — barra horizontal de navegación (DESKTOP ≥960px)
+   --------------------------------------------------------------------------
+   · Vive dentro del .nav-inner como una columna del grid (auto 1fr auto).
+   · `display: contents` hace que el <ul> suba al grid del nav-inner, así
+     los items se alinean en la fila del header sin wrapper extra.
+   · Hidden por defecto (mobile) — ahí manda el .menu-drawer.
+   · Sin submenús ni footer aquí: si más adelante quieres dropdowns, viven
+     en este archivo (TODO al final).
+
+   Secciones (Ctrl+F):
+     1) BASE (oculto en mobile)
+     2) DESKTOP (≥960px)
+   ========================================================================== */
+
+@layer component {
+
+/* === 1) BASE — oculto por defecto, manda el drawer en mobile ============== */
+
+.menu-bar { display: none; }
+
+
+/* === 2) DESKTOP (≥960px) ================================================== */
+
+@media (min-width: 960px) {
+  .menu-bar {
+    display: contents;        /* el <ul> sube al grid del .nav-inner */
+    color: inherit;           /* hereda el color del .nav (.nav-over-hero → blanco) */
+  }
+
+  .menu-bar-list {
+    justify-self: start;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-8);
+    list-style: none;
+    margin: 0; padding: 0;
+  }
+
+  .menu-bar-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-2) 0;
+    font: inherit;
+    font-size: var(--fs-menu-bar);
+    font-weight: var(--fw-medium);
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Underline animado al hover/active.
+     scale-X 0→1 da una entrada limpia desde la izquierda. Color de marca
+     (amarillo) — coherente con el accent del drawer mobile. */
+  .menu-bar-link::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -6px;
+    height: 2px;
+    background: var(--c-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--t-base);
+  }
+  .menu-bar-link:hover::before,
+  .menu-bar-link[aria-current="page"]::before { transform: scaleX(1); }
+}
+
+
+/* TODO — siguiente iteración: dropdowns en hover para Productos / Soluciones.
+   Estructura sugerida:
+     <li class="menu-bar-item has-dropdown">
+       <button class="menu-bar-link" aria-expanded="false">Productos</button>
+       <div class="menu-bar-dropdown" role="menu">...</div>
+     </li>
+   El dropdown vive en este archivo (no en menu-drawer.css). */
+
+}

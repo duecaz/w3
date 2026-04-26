@@ -1,0 +1,118 @@
+/* ==========================================================================
+   TOKENS - Variables globales del sitio
+   Breakpoints (hardcoded en @media porque las custom props no funcionan ahí):
+     md: 768px   (tablet)
+     lg: 1024px  (desktop - el nav cambia a horizontal aquí)
+     xl: 1280px  (desktop amplio)
+   ========================================================================== */
+
+@layer tokens {
+
+:root{
+  /* Versión (mostrada en el badge de debug y en el ?v=X.Y.Z de los assets) */
+  --version: "v0.5.4";
+
+  /* Colores base */
+  --c-bg:        #ffffff;
+  --c-text:      #111111;
+  --c-text-soft: #6b6b6b;
+  --c-border:    #e4e7ec;
+  --c-accent:    #ffdd00;
+  --c-overlay:   rgba(0,0,0,.45);
+
+  /* Tipografía: stack tipo Insta360 (Helvetica → Arial → system) sin webfont */
+  --font: "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system, sans-serif;
+
+  /* Escala tipográfica (consumida por hero, cards, features...) */
+  --fs-eyebrow: clamp(11px, .4vw + 10px, 13px);
+  --fs-title:   clamp(2rem, 4vw + 1rem, 3.75rem);
+  --fs-sub:     clamp(1rem, .5vw + .9rem, 1.25rem);
+  --fs-body:    1rem;
+  --fs-small:   .875rem;
+  /* Tamaños específicos del menú: el bar (desktop) usa más compacto que el
+     body porque vive en una barra de 64px; el drawer (mobile) usa más
+     grande para tap targets cómodos. */
+  --fs-menu-bar:    14px;
+  --fs-menu-drawer: 17px;
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-bold:    700;
+  --lh-tight: 1.1;
+  --lh-base:  1.5;
+  --ls-eyebrow: .08em;
+
+  /* Escala de espaciado (4px base) */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Layout */
+  --container-max: 1200px;
+  --container-pad: 24px;
+  --gap: 20px;
+
+  /* Nav */
+  --nav-h:  64px;
+  --nav-bg: var(--c-bg);
+  --shadow-nav: 0 1px 0 rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  --logo-h: 28px;     /* alto visual del logo SVG en el header */
+
+  /* Hero / slider */
+  --hero-h:    clamp(560px, 82vh, 780px);
+  --slide-dur: 5s;
+  --slide-fade: .6s;
+
+  /* Botones */
+  --btn-r: 999px;
+
+  /* Radios */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+
+  /* Z-index — el header queda ENCIMA del menu full-screen para que el botón X
+     y el logo sigan visibles cuando el menú está abierto. */
+  --z-menu:    900;
+  --z-header:  1000;
+
+  /* Transiciones */
+  --t-fast: .15s ease;
+  --t-base: .25s ease;
+}
+
+/* ==========================================================================
+   THEMES - data-theme="..." define paleta para el slide/sección.
+   Cualquier descendiente puede consumir --bg-themed, --fg-themed, etc.
+   Reusable en hero, features, cards.
+   ========================================================================== */
+
+[data-theme="ink"] {
+  --bg-themed:      #0e1628;
+  --fg-themed:      #ffffff;
+  --fg-soft-themed: rgba(255,255,255,.72);
+  --accent-themed:  #ffdd00;
+}
+[data-theme="moss"] {
+  --bg-themed:      #1f2e21;
+  --fg-themed:      #ffffff;
+  --fg-soft-themed: rgba(255,255,255,.74);
+  --accent-themed:  #c8ff5a;
+}
+[data-theme="clay"] {
+  --bg-themed:      #2c1816;
+  --fg-themed:      #ffffff;
+  --fg-soft-themed: rgba(255,255,255,.74);
+  --accent-themed:  #ff7a59;
+}
+
+}

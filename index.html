@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Browser chrome de mobile coincide con el primer slide (ink). -->
+  <meta name="theme-color" content="#0e1628">
+  <title>EduBoard — dev</title>
+
+  <!-- Favicon SVG inline: cero peticiones extra, cero 404. Marca la pestaña
+       con el accent amarillo de la marca sobre el azul del primer slide. -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230e1628'/><text x='16' y='22' font-size='18' font-weight='700' text-anchor='middle' fill='%23ffdd00' font-family='system-ui'>e</text></svg>">
+
+  <!-- =====================================================================
+       ORDEN DE CAPAS DE CASCADA — declarado ANTES de cualquier <link>.
+       Una capa declarada después en esta lista gana sobre las anteriores,
+       sin importar specificity ni orden de los <link>. Permite reordenar /
+       añadir CSS sin pelear con !important.
+         reset    → resets globales (perdedores)
+         tokens   → variables CSS (consumibles desde cualquier capa)
+         base    → tipografía y defaults globales
+         layout   → primitivas (container, grid, split)
+         component → componentes (nav, menu-bar, menu-drawer, button, hero, card)
+         debug    → overlays de desarrollo (gana siempre, body.debug)
+       ===================================================================== -->
+  <style>@layer reset, tokens, base, layout, component, debug;</style>
+
+  <!-- CSS modular (se concatenará en producción).
+       NOTA: actualizar el ?v=X.Y.Z cuando se cambia --version en tokens.css
+       para invalidar caches de navegador y CDN de GitHub Pages. -->
+  <link rel="stylesheet" href="assets/css/tokens.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/reset.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/base.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/layout/container.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/layout/grid.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/layout/split.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/nav.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/menu-bar.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/menu-drawer.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/button.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/hero.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/components/card.css?v=0.5.4">
+  <link rel="stylesheet" href="assets/css/debug.css?v=0.5.4">
+</head>
+
+<!-- class="debug" activa los bordes/badges de desarrollo. Quitar para producción. -->
+<body class="debug">
+
+<!-- =====================================================================
+     HEADER. Contiene branding (logo), controles globales (hamb, WhatsApp)
+     y el .menu-bar horizontal para desktop. El drawer mobile vive FUERA
+     (siguiente bloque) — ver nota de stacking en nav.css.
+     ===================================================================== -->
+<header class="nav nav-over-hero">
+  <div class="container nav-inner">
+
+    <button class="nav-toggle" aria-label="Abrir menú"
+            aria-controls="menu-drawer" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <a href="#" class="nav-logo" aria-label="EduBoard - inicio">
+      <svg width="170" height="32" viewBox="0 0 170 36" xmlns="http://www.w3.org/2000/svg" role="img">
+        <title>EduBoard</title>
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+          <line x1="8" y1="1" x2="162" y2="1"/>
+          <line x1="169" y1="8" x2="169" y2="28"/>
+          <line x1="8" y1="35" x2="162" y2="35"/>
+          <line x1="1" y1="8" x2="1" y2="28"/>
+          <path d="M8 1 Q 1 1 1 8"/>
+          <path d="M162 1 Q 169 1 169 8"/>
+          <path d="M8 35 Q 1 35 1 28"/>
+          <path d="M162 35 Q 169 35 169 28"/>
+        </g>
+        <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle"
+              font-size="18" font-family="system-ui, sans-serif" fill="currentColor" letter-spacing="3">
+          <tspan font-weight="700">EDU</tspan><tspan>BOARD</tspan>
+        </text>
+      </svg>
+    </a>
+
+    <!-- =====================================================================
+         MENU-BAR. Solo desktop ≥960px. display:contents hace que el <ul>
+         suba al grid del .nav-inner (auto 1fr auto). Sin submenús ni footer
+         aquí — esos viven en el .menu-drawer (mobile). Para añadir dropdowns
+         en hover, ver TODO al final de menu-bar.css.
+         ===================================================================== -->
+    <nav class="menu-bar" aria-label="Principal (desktop)">
+      <ul class="menu-bar-list">
+        <li><a class="menu-bar-link" href="#" aria-current="page">Inicio</a></li>
+        <li><a class="menu-bar-link" href="#">Productos</a></li>
+        <li><a class="menu-bar-link" href="#">Soluciones</a></li>
+        <li><a class="menu-bar-link" href="#">Nosotros</a></li>
+        <li><a class="menu-bar-link" href="#">FAQ</a></li>
+        <li><a class="menu-bar-link" href="#">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-right">
+      <span class="nav-version" aria-hidden="true"></span>
+      <a class="nav-whatsapp" href="https://wa.me/" aria-label="Contactar por WhatsApp" target="_blank" rel="noopener">
+        <svg viewBox="4 4 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill-rule="evenodd" d="M24.504 7.504A11.875 11.875 0 0 0 16.05 4C9.465 4 4.1 9.36 4.1 15.945a11.882 11.882 0 0 0 1.594 5.973L4 28.109l6.336-1.664a11.958 11.958 0 0 0 5.71 1.457h.005c6.586 0 11.945-5.359 11.949-11.949 0-3.191-1.242-6.191-3.496-8.45ZM16.05 25.883h-.004a9.93 9.93 0 0 1-5.055-1.383l-.363-.215-3.762.985 1.004-3.665-.234-.375a9.904 9.904 0 0 1-1.52-5.285c0-5.472 4.457-9.925 9.938-9.925a9.863 9.863 0 0 1 7.02 2.91 9.875 9.875 0 0 1 2.905 7.023c0 5.477-4.457 9.93-9.93 9.93Zm5.445-7.438c-.297-.148-1.766-.87-2.039-.968-.273-.102-.473-.149-.672.148-.2.3-.77.973-.945 1.172-.172.195-.348.223-.645.074-.3-.148-1.261-.465-2.402-1.484-.887-.79-1.488-1.77-1.66-2.067-.176-.3-.02-.46.129-.61.136-.132.3-.347.449-.523.148-.171.2-.296.3-.496.098-.199.048-.375-.027-.523-.074-.148-.671-1.621-.921-2.219-.243-.582-.489-.5-.672-.511-.172-.008-.371-.008-.57-.008-.2 0-.524.074-.798.375-.273.297-1.043 1.02-1.043 2.488 0 1.469 1.07 2.89 1.22 3.09.148.195 2.105 3.21 5.1 4.504.712.308 1.266.492 1.7.629.715.226 1.367.195 1.883.12.574-.085 1.765-.722 2.015-1.421.247-.695.247-1.293.172-1.418-.074-.125-.273-.2-.574-.352Z"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+
+<!-- =====================================================================
+     MENU-DRAWER. Overlay fullscreen para mobile (<960px). Es HERMANO del
+     header (no descendiente) a propósito — anidarlo crearía un containing
+     block en el header que atraparía su position:fixed y rompería z-index
+     entre el drawer y la X / logo / WhatsApp del header.
+     Su z-index (--z-menu = 900) es menor que el del .nav (1000) para que
+     el header pinte encima cuando el drawer abre — ver menu-drawer.css.
+     ===================================================================== -->
+<nav id="menu-drawer" class="menu-drawer" aria-label="Principal (mobile)">
+  <ul class="menu-drawer-list">
+    <li><a class="menu-drawer-link" href="#" aria-current="page">Inicio</a></li>
+
+    <li>
+      <button type="button" class="menu-drawer-link" aria-expanded="false" aria-controls="sub-productos">
+        <span>Productos</span>
+        <svg class="menu-drawer-chevron" viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M2.5 4 L6 7.5 L9.5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="menu-drawer-sublist" id="sub-productos">
+        <ul>
+          <li><a href="#">Pizarras interactivas</a></li>
+          <li><a href="#">Pantallas 4K UHD</a></li>
+          <li><a href="#">Soportes y accesorios</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li>
+      <button type="button" class="menu-drawer-link" aria-expanded="false" aria-controls="sub-soluciones">
+        <span>Soluciones</span>
+        <svg class="menu-drawer-chevron" viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M2.5 4 L6 7.5 L9.5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="menu-drawer-sublist" id="sub-soluciones">
+        <ul>
+          <li><a href="#">Educación</a></li>
+          <li><a href="#">Salas de juntas</a></li>
+          <li><a href="#">Capacitación corporativa</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li><a class="menu-drawer-link" href="#">Nosotros</a></li>
+    <li><a class="menu-drawer-link" href="#">FAQ</a></li>
+    <li><a class="menu-drawer-link" href="#">Contacto</a></li>
+  </ul>
+
+  <div class="menu-drawer-footer">
+    <ul class="menu-drawer-social" aria-label="Redes sociales">
+      <li><a href="#" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.62c-3.15 0-3.5.01-4.74.07-1.07.05-1.65.23-2.04.38a3.5 3.5 0 0 0-1.27.82 3.5 3.5 0 0 0-.82 1.27c-.15.39-.33.97-.38 2.04-.06 1.24-.07 1.59-.07 4.64s.01 3.4.07 4.64c.05 1.07.23 1.65.38 2.04.2.5.45.86.82 1.27.4.4.77.62 1.27.82.39.15.97.33 2.04.38 1.24.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.07-.05 1.65-.23 2.04-.38.5-.2.86-.45 1.27-.82.4-.4.62-.77.82-1.27.15-.39.33-.97.38-2.04.06-1.24.07-1.59.07-4.64s-.01-3.4-.07-4.64c-.05-1.07-.23-1.65-.38-2.04a3.5 3.5 0 0 0-.82-1.27 3.5 3.5 0 0 0-1.27-.82c-.39-.15-.97-.33-2.04-.38-1.24-.06-1.59-.07-4.74-.07Zm0 2.76a5.46 5.46 0 1 1 0 10.92 5.46 5.46 0 0 1 0-10.92Zm0 9a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08Zm6.95-9.22a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0Z"/>
+        </svg>
+      </a></li>
+      <li><a href="#" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.78-3.91 1.1 0 2.24.2 2.24.2v2.48h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.75 8.43-4.91 8.43-9.93Z"/>
+        </svg>
+      </a></li>
+      <li><a href="#" aria-label="YouTube">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M23.5 6.51a3 3 0 0 0-2.11-2.12C19.5 3.86 12 3.86 12 3.86s-7.5 0-9.39.53A3 3 0 0 0 .5 6.51C0 8.42 0 12 0 12s0 3.58.5 5.49a3 3 0 0 0 2.11 2.12C4.5 20.14 12 20.14 12 20.14s7.5 0 9.39-.53a3 3 0 0 0 2.11-2.12C24 15.58 24 12 24 12s0-3.58-.5-5.49ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z"/>
+        </svg>
+      </a></li>
+      <li><a href="https://wa.me/" target="_blank" rel="noopener" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20.5 3.49A11.88 11.88 0 0 0 12.04 0C5.46 0 .1 5.36.1 11.95a11.88 11.88 0 0 0 1.6 5.97L0 24l6.34-1.66a11.96 11.96 0 0 0 5.7 1.45h.01c6.59 0 11.95-5.36 11.95-11.95 0-3.19-1.24-6.19-3.5-8.45ZM12.04 21.88a9.93 9.93 0 0 1-5.06-1.38l-.36-.22-3.76.99 1-3.66-.24-.38a9.9 9.9 0 0 1-1.52-5.29c0-5.47 4.46-9.93 9.94-9.93a9.86 9.86 0 0 1 7.02 2.91 9.88 9.88 0 0 1 2.91 7.02c0 5.48-4.46 9.94-9.93 9.94Zm5.45-7.44c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.48-.5-.67-.51-.17 0-.37 0-.57 0s-.52.07-.8.37c-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.21 5.1 4.5.71.31 1.26.49 1.7.63.71.23 1.36.2 1.88.12.57-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35Z"/>
+        </svg>
+      </a></li>
+    </ul>
+
+    <a class="btn btn-primary btn-icon menu-drawer-cta" href="https://wa.me/">Cotizar por WhatsApp</a>
+  </div>
+</nav>
+
+
+<main>
+
+  <!-- =====================================================================
+       HERO - 3 slides, fade entre ellos, autoplay 5s, barras de progreso.
+       Cada slide = un data-theme distinto que tiñe bg/fg/accent.
+       Imagen actual = SVG placeholder; reemplazar por <picture> cuando
+       lleguen las fotos a assets/img/.
+       ===================================================================== -->
+  <section class="hero" data-theme="ink"
+           aria-roledescription="carousel" aria-label="Productos destacados">
+    <div class="hero-track">
+
+      <article class="hero-slide is-active" data-theme="ink"
+               id="slide-0" aria-roledescription="slide" aria-label="1 de 3">
+        <div class="container split">
+          <div class="split__text">
+            <p class="eyebrow">Pizarra interactiva</p>
+            <h1 class="hero-title">Aprender es <strong>tocar.</strong></h1>
+            <p class="hero-sub">Pantallas táctiles 4K UHD para aulas que respiran tecnología. Multi-touch hasta 20 puntos.</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-icon" href="#">Ver modelos</a>
+              <a class="btn btn-ghost btn-icon" href="#">Cotizar</a>
+            </div>
+          </div>
+          <div class="split__media">
+            <div class="hero-media">
+              <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="20" y="20" rx="14" ry="14" width="440" height="240" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.28)" stroke-width="1.5"/>
+                <rect x="50" y="48" rx="6" ry="6" width="380" height="184" fill="rgba(255,255,255,.04)"/>
+                <text x="240" y="148" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,.5)" font-family="system-ui" font-size="13" letter-spacing="3">PIZARRA INTERACTIVA</text>
+                <rect x="220" y="265" rx="2" ry="2" width="40" height="6" fill="rgba(255,255,255,.22)"/>
+                <rect x="160" y="280" rx="3" ry="3" width="160" height="14" fill="rgba(255,255,255,.12)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="hero-slide" data-theme="moss"
+               id="slide-1" aria-roledescription="slide" aria-label="2 de 3" aria-hidden="true" inert>
+        <div class="container split split--media-left">
+          <div class="split__text">
+            <p class="eyebrow">Resolución 4K UHD</p>
+            <h1 class="hero-title">Cada píxel <strong>enseña.</strong></h1>
+            <p class="hero-sub">Imagen nítida hasta el último asiento. Antirreflejo, bajo consumo, color real.</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-icon" href="#">Especificaciones</a>
+              <a class="btn btn-ghost btn-icon" href="#">Solicitar demo</a>
+            </div>
+          </div>
+          <div class="split__media">
+            <div class="hero-media">
+              <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="40" y="30" rx="10" ry="10" width="400" height="220" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.28)" stroke-width="1.5"/>
+                <rect x="60" y="50" width="360" height="180" fill="rgba(255,255,255,.04)"/>
+                <text x="240" y="140" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,.5)" font-family="system-ui" font-size="13" letter-spacing="3">PANTALLA 4K UHD</text>
+                <rect x="180" y="265" width="120" height="6" fill="rgba(255,255,255,.18)"/>
+                <rect x="200" y="280" width="80" height="14" fill="rgba(255,255,255,.12)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="hero-slide" data-theme="clay"
+               id="slide-2" aria-roledescription="slide" aria-label="3 de 3" aria-hidden="true" inert>
+        <div class="container split">
+          <div class="split__text">
+            <p class="eyebrow">Multi-touch 20 puntos</p>
+            <h1 class="hero-title">Colaboran <strong>todos a la vez.</strong></h1>
+            <p class="hero-sub">Hasta 20 manos sobre la misma superficie. Aula real, conversación real, ideas en simultáneo.</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-icon" href="#">Cómo funciona</a>
+              <a class="btn btn-ghost btn-icon" href="#">Reservar piloto</a>
+            </div>
+          </div>
+          <div class="split__media">
+            <div class="hero-media">
+              <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="30" y="30" rx="12" ry="12" width="420" height="220" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.28)" stroke-width="1.5"/>
+                <circle cx="150" cy="140" r="11" fill="rgba(255,255,255,.55)"/>
+                <circle cx="220" cy="170" r="11" fill="rgba(255,255,255,.55)"/>
+                <circle cx="290" cy="120" r="11" fill="rgba(255,255,255,.55)"/>
+                <circle cx="345" cy="180" r="11" fill="rgba(255,255,255,.55)"/>
+                <text x="240" y="225" text-anchor="middle" fill="rgba(255,255,255,.5)" font-family="system-ui" font-size="13" letter-spacing="3">MULTI-TOUCH</text>
+                <rect x="160" y="265" width="160" height="6" fill="rgba(255,255,255,.18)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="hero-progress">
+      <span class="hero-counter" aria-hidden="true">
+        <span class="hero-counter__current">01</span>
+        <span class="hero-counter__sep">/</span>
+        <span class="hero-counter__total">03</span>
+      </span>
+
+      <div class="hero-progress-bars" role="tablist" aria-label="Slides">
+        <button type="button" class="hero-progress-item is-active"
+                role="tab" aria-selected="true"
+                aria-controls="slide-0" data-index="0" tabindex="0">
+          <span class="hero-progress-fill"></span>
+        </button>
+        <button type="button" class="hero-progress-item"
+                role="tab" aria-selected="false"
+                aria-controls="slide-1" data-index="1" tabindex="-1">
+          <span class="hero-progress-fill"></span>
+        </button>
+        <button type="button" class="hero-progress-item"
+                role="tab" aria-selected="false"
+                aria-controls="slide-2" data-index="2" tabindex="-1">
+          <span class="hero-progress-fill"></span>
+        </button>
+      </div>
+
+      <button type="button" class="hero-playpause"
+              aria-label="Pausar slideshow" aria-pressed="false">
+        <svg class="icon-pause" viewBox="0 0 12 12" aria-hidden="true">
+          <rect x="3"   y="2" width="2.2" height="8" rx=".4"/>
+          <rect x="6.8" y="2" width="2.2" height="8" rx=".4"/>
+        </svg>
+        <svg class="icon-play" viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M3.2 2 L9.8 6 L3.2 10 Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Anuncia el cambio de slide a screen readers. -->
+    <div class="sr-only" data-hero-live aria-live="polite" aria-atomic="true"></div>
+  </section>
+
+  <!-- Cards demo (provisional, validar grid mientras se construye el sitio) -->
+  <section class="container" style="padding-block: var(--sp-10)">
+    <h2 style="margin-bottom: var(--sp-6)">Grid de prueba</h2>
+    <div class="grid cols-1 md-cols-2 lg-cols-3">
+      <article class="card"><h3 class="card__title">Card 1</h3><p class="card__text">Demo grid + spacing.</p></article>
+      <article class="card"><h3 class="card__title">Card 2</h3><p class="card__text">Demo grid + spacing.</p></article>
+      <article class="card"><h3 class="card__title">Card 3</h3><p class="card__text">Demo grid + spacing.</p></article>
+    </div>
+  </section>
+
+</main>
+
+<script src="assets/js/nav-scroll.js?v=0.5.4" defer></script>
+<script src="assets/js/menu-drawer.js?v=0.5.4" defer></script>
+<script src="assets/js/hero.js?v=0.5.4" defer></script>
+</body>
+</html>

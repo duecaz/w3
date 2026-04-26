@@ -1,0 +1,175 @@
+/* ==========================================================================
+   MENU-DRAWER.CSS — overlay fullscreen mobile (<960px)
+   --------------------------------------------------------------------------
+   · Vive a nivel de body (HERMANO del header), NO dentro de él.
+     Esto evita el clásico problema de stacking context: el drawer es
+     z-index:900, el header z-index:1000, así el header pinta encima del
+     drawer y la X / logo / WhatsApp siguen visibles cuando el drawer abre.
+   · Position fixed; inset:0; padding-top = nav-h para que el contenido del
+     drawer no quede tapado por el header.
+   · Submenús accordion: <button aria-expanded> + chevron que rota.
+   · Footer con redes sociales + CTA grande.
+   · Hidden ≥960px — ahí manda el .menu-bar dentro del header.
+
+   Secciones (Ctrl+F):
+     1) CONTAINER (visibility, transición open/close)
+     2) LIST + ITEMS (link, botón submenu, barra amarilla)
+     3) SUBMENÚS (accordion + chevron)
+     4) FOOTER (redes sociales + CTA)
+     5) DESKTOP (≥960px) — oculto
+   ========================================================================== */
+
+@layer component {
+
+/* === 1) CONTAINER ========================================================= */
+
+.menu-drawer {
+  position: fixed;
+  inset: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  z-index: var(--z-menu);     /* 900 — debajo del .nav (1000) */
+  display: flex;
+  flex-direction: column;
+  /* Reserva el alto del nav (que se pinta encima por z-index global). */
+  padding: var(--nav-h) 0 0;
+
+  /* Visibilidad: visibility para evitar clicks cuando está oculto. */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .25s ease, visibility 0s linear .25s;
+}
+.menu-drawer.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .25s ease, visibility 0s;
+}
+
+
+/* === 2) LIST + ITEMS ====================================================== */
+
+.menu-drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-3) 0;
+}
+
+/* .menu-drawer-link aplica a <a> y a <button> indistintamente */
+.menu-drawer-link {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  font: inherit;
+  font-size: var(--fs-menu-drawer);
+  font-weight: var(--fw-medium);
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--t-fast);
+}
+.menu-drawer-link:hover { background: rgba(0,0,0,.03); }
+
+/* Barra vertical amarilla a la izquierda en hover/active/expanded.
+   Full-height + 5px para que el accent sea claramente visible al primer
+   vistazo (antes era 4px y solo el 50% central — pasaba desapercibido). */
+.menu-drawer-link::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: var(--c-accent);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.menu-drawer-link:hover::before,
+.menu-drawer-link[aria-current="page"]::before,
+.menu-drawer-link[aria-expanded="true"]::before { opacity: 1; }
+
+
+/* === 3) SUBMENÚS — accordion ============================================== */
+
+.menu-drawer-chevron {
+  width: 14px; height: 14px;
+  fill: currentColor;
+  opacity: .55;
+  transition: transform var(--t-base);
+  flex-shrink: 0;
+}
+[aria-expanded="true"] > .menu-drawer-chevron { transform: rotate(180deg); }
+
+/* Wrapper del submenu. Estructura HTML:
+     <div class="menu-drawer-sublist"><ul>...</ul></div>
+   El truco grid-template-rows 0fr→1fr anima la altura sin medir DOM.
+   Soporte: Chrome 117+, FF 121+, Safari 17+. */
+.menu-drawer-sublist {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--t-base);
+}
+.menu-drawer-sublist > ul {
+  overflow: hidden;
+  min-height: 0;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+[aria-expanded="true"] + .menu-drawer-sublist { grid-template-rows: 1fr; }
+
+.menu-drawer-sublist a {
+  display: block;
+  padding: var(--sp-3) var(--sp-5) var(--sp-3) calc(var(--sp-5) + var(--sp-6));
+  font-size: 15px;
+  font-weight: var(--fw-regular);
+  color: var(--c-text-soft);
+  transition: color var(--t-fast);
+}
+.menu-drawer-sublist a:hover { color: var(--c-text); }
+
+
+/* === 4) FOOTER (redes sociales + CTA) ===================================== */
+
+.menu-drawer-footer {
+  border-top: 1px solid var(--c-border);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.menu-drawer-social {
+  display: flex;
+  gap: var(--sp-2);
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.menu-drawer-social a {
+  width: 40px; height: 40px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: inherit;
+  transition: background var(--t-fast);
+}
+.menu-drawer-social a:hover { background: rgba(0,0,0,.06); }
+.menu-drawer-social svg { width: 20px; height: 20px; fill: currentColor; }
+
+.menu-drawer-cta { width: 100%; justify-content: center; }
+
+
+/* === 5) DESKTOP (≥960px) — oculto ========================================= */
+
+@media (min-width: 960px) {
+  .menu-drawer { display: none; }
+}
+
+}

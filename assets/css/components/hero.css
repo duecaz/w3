@@ -1,0 +1,278 @@
+/* ==========================================================================
+   HERO.CSS — carrusel de slides apilados con fade + barras + touch
+   --------------------------------------------------------------------------
+   · El nav es fixed y vive ENCIMA del hero. Por eso el hero arranca en y=0
+     ocupando 100svh, y los slides reservan padding-top = altura del nav.
+   · Cada slide define su tema con data-theme="ink|moss|clay" (tokens.css).
+   · Mobile-first: texto centrado + swipe táctil para navegar.
+   · Desktop ≥768px: contenido lateral (split 50/50).
+
+   Secciones (Ctrl+F):
+     1) HERO container
+     2) TRACK (gesture surface)
+     3) SLIDE (apilados con fade + drag feedback)
+     4) MOBILE: contenido centrado
+     5) TIPOGRAFÍA (eyebrow / title / sub)
+     6) MEDIA (placeholder SVG / futuras imágenes)
+     7) BOTTOM UI: counter | barras | play-pause
+     8) BARRAS (animación de progreso)
+     9) PLAY / PAUSE button
+    10) prefers-reduced-motion
+    11) DESKTOP overrides (≥ 768px)
+   ========================================================================== */
+
+@layer component {
+
+/* === 1) HERO container ===================================================== */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* svh = small viewport height: excluye la barra dinámica del browser mobile.
+     Sin esto el hero "salta" cuando aparece/desaparece la barra del navegador. */
+  height: 100svh;
+  min-height: 560px;
+  max-height: 900px;
+  background: var(--bg-themed, #0e1628);
+  color:      var(--fg-themed, #ffffff);
+  transition: background var(--slide-fade) ease;
+}
+
+
+/* === 2) TRACK (gesture surface) =========================================== */
+/* touch-action: pan-y → el navegador conserva scroll vertical nativo y nos
+   cede solo el gesto horizontal. Sin esto, el browser intercepta el swipe. */
+.hero-track {
+  position: relative;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+
+/* === 3) SLIDE ============================================================== */
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  /* Reserva espacio para el nav fixed arriba y el bottom UI debajo. */
+  padding-top:    calc(var(--nav-h) + var(--sp-4));
+  padding-bottom: calc(var(--sp-12) + var(--sp-6));
+  background: var(--bg-themed);
+  color:      var(--fg-themed);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--slide-fade) ease,
+              visibility 0s linear var(--slide-fade);
+}
+.hero-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--slide-fade) ease, visibility 0s;
+  z-index: 1;
+  will-change: transform, opacity;
+}
+
+/* Drag feedback (JS aplica inline transform; aquí solo evitamos animar
+   el opacity durante el drag para no flickear). */
+.hero.is-dragging .hero-slide.is-active {
+  transition: opacity var(--slide-fade) ease;
+}
+
+/* Snap-back tras soltar el drag. JS añade .is-snapping al slide activo,
+   le pone style.transform = '' y la transición usa el token --t-base.
+   Antes esto vivía como string inline en hero.js con la duración duplicada. */
+.hero-slide.is-snapping {
+  transition: transform var(--t-base);
+}
+
+/* Viñeta sutil para que la imagen no quede plana sobre el bg. */
+.hero-slide::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 30%,
+              transparent 0%, rgba(0,0,0,.28) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-slide > .container { position: relative; z-index: 1; width: 100%; }
+
+
+/* === 4) MOBILE: contenido centrado ======================================== */
+/* Default mobile-first. Desktop revierte abajo (sección 11). */
+.hero-slide .split__text { text-align: center; }
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  justify-content: center;
+}
+
+
+/* === 5) TIPOGRAFÍA ========================================================= */
+
+.eyebrow {
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--accent-themed, var(--c-accent));
+  margin-bottom: var(--sp-3);
+}
+.hero-title {
+  font-size: var(--fs-title);
+  line-height: var(--lh-tight);
+  font-weight: var(--fw-regular);   /* base regular, <strong> da el bold */
+  margin-bottom: var(--sp-4);
+  color: var(--fg-themed);
+  letter-spacing: -.01em;
+}
+.hero-title strong { font-weight: var(--fw-bold); }
+.hero-sub {
+  font-size: var(--fs-sub);
+  line-height: var(--lh-base);
+  color: var(--fg-soft-themed, rgba(255,255,255,.72));
+  margin: 0 auto var(--sp-6);   /* centrado mobile (auto), reset en desktop */
+  max-width: 38ch;
+}
+
+
+/* === 6) MEDIA ============================================================== */
+
+.hero-media { display: grid; place-items: center; width: 100%; }
+.hero-media svg,
+.hero-media img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  filter: drop-shadow(0 14px 36px rgba(0,0,0,.4));
+  pointer-events: none;   /* no roba el gesto de swipe al track */
+}
+
+
+/* === 7) BOTTOM UI: counter | barras | play-pause ========================== */
+
+.hero-progress {
+  position: absolute;
+  left: 0; right: 0; bottom: var(--sp-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding-inline: var(--container-pad);
+  z-index: 2;
+}
+
+/* Counter "01 / 03" — tabular-nums evita el salto de ancho al cambiar */
+.hero-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  min-width: 5ch;
+  font-size: var(--fs-small);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .05em;
+  color: var(--fg-soft-themed, rgba(255,255,255,.72));
+}
+.hero-counter__sep,
+.hero-counter__total { opacity: .55; }
+
+
+/* === 8) BARRAS (progress bars) ============================================ */
+
+.hero-progress-bars {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.hero-progress-item {
+  position: relative;
+  width: 48px;
+  height: 2px;
+  background: rgba(255,255,255,.28);
+  border: 0;
+  border-radius: 2px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Tap area accesible (≥24px alto) sin alterar el tamaño visual */
+.hero-progress-item::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -14px; bottom: -14px;
+}
+.hero-progress-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: rgba(255,255,255,.95);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.hero-progress-item.is-done   .hero-progress-fill { transform: scaleX(1); }
+.hero-progress-item.is-active .hero-progress-fill {
+  animation: hero-fill var(--slide-dur) linear forwards;
+}
+@keyframes hero-fill { to { transform: scaleX(1); } }
+
+/* Estados que pausan el autoplay — un único selector consolidado.
+   Hover, focus por teclado, click en pause, swipe en curso. */
+.hero:hover           .hero-progress-item.is-active .hero-progress-fill,
+.hero:focus-within    .hero-progress-item.is-active .hero-progress-fill,
+.hero.is-paused       .hero-progress-item.is-active .hero-progress-fill,
+.hero.is-dragging     .hero-progress-item.is-active .hero-progress-fill {
+  animation-play-state: paused;
+}
+
+
+/* === 9) PLAY / PAUSE button =============================================== */
+
+.hero-playpause {
+  width: 28px; height: 28px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  border: 0; padding: 0;
+  background: transparent;
+  color: var(--fg-themed);
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--t-fast);
+}
+.hero-playpause:hover         { background: rgba(255,255,255,.15); }
+.hero-playpause:focus-visible { outline: 2px solid var(--fg-themed); outline-offset: 2px; }
+.hero-playpause svg           { width: 12px; height: 12px; fill: currentColor; }
+/* Toggle de iconos según estado: por defecto muestra pause, al pausar muestra play */
+.hero-playpause .icon-play                  { display: none; }
+.hero.is-paused .hero-playpause .icon-pause { display: none; }
+.hero.is-paused .hero-playpause .icon-play  { display: block; }
+
+
+/* === 10) prefers-reduced-motion =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-progress-item.is-active .hero-progress-fill {
+    animation: none; transform: scaleX(1);
+  }
+  .hero-slide { transition: none; }
+}
+
+
+/* === 11) DESKTOP overrides (>= 768px) ===================================== */
+
+@media (min-width: 768px) {
+  .hero-slide .split__text { text-align: left; }
+  .hero-cta                { justify-content: flex-start; }
+  .hero-sub                { margin-inline: 0; max-width: 32ch; }
+  .hero-progress-item      { width: 56px; }
+}
+
+}

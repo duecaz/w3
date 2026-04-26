@@ -1,0 +1,21 @@
+/* ==========================================================================
+   DEBUG - activar añadiendo class="debug" al <body>
+   Pinta bordes y fondos para ver el layout. Quitar en producción.
+   ========================================================================== */
+
+@layer debug {
+
+body.debug *             { outline: 1px solid hsla(340, 90%, 50%, .15); }
+
+body.debug .container    { background: hsla(200, 90%, 50%, .04); }
+
+body.debug .grid         { background: hsla( 45, 95%, 50%, .06); }
+body.debug .grid > *     { background: hsla(120, 45%, 50%, .06); }
+
+/* Sin override de bg en nav/menu: el outline general ya marca sus bordes
+   y así no rompemos el look real de los componentes durante el desarrollo. */
+
+/* El indicador "DEBUG vX.Y.Z" ahora vive inline en el nav (.nav-version),
+   ver assets/css/components/nav.css. */
+
+}
